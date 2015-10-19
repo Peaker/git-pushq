@@ -12,11 +12,12 @@ module Git.CLI
     , commitsBetween
     , branchCheckout
     , branchNewCheckout
+    , branchNew
     , branchDelete
     , branchDeleteRemote
     , branchRename
     , commit
-    , rebase
+    , rebaseOnto
     , revParse
     ) where
 
@@ -108,6 +109,9 @@ branchNewCheckout :: RepoPath -> Branch -> RefSpec -> IO ()
 branchNewCheckout repoPath name pos =
     void $ git repoPath "checkout" ["-b", name, pos, "--"]
 
+branchNew :: RepoPath -> Branch -> RefSpec -> IO ()
+branchNew repoPath name pos = void $ git repoPath "branch" [name, pos]
+
 branchDelete :: RepoPath -> Branch -> IO ()
 branchDelete repoPath name =
     void $ git repoPath "branch" ["-D", name]
@@ -129,9 +133,8 @@ commit :: RepoPath -> String -> IO ()
 commit repoPath msg =
     void $ git repoPath "commit" ["-m", msg, "--allow-empty"]
 
-rebase :: RepoPath -> RefSpec -> IO ()
-rebase repoPath refSpec =
-    void $ git repoPath "rebase" [refSpec]
+rebaseOnto :: RepoPath -> RefSpec -> RefSpec -> IO ()
+rebaseOnto repoPath newBase oldBase = void $ git repoPath "rebase" ["--onto", newBase, oldBase]
 
 revParse :: RepoPath -> RefSpec -> IO CommitID
 revParse repoPath refSpec = stripNewline <$> git repoPath "rev-parse" [refSpec]

@@ -63,7 +63,7 @@ attemptRebase repoPath (name, testingBranch) base =
     do  Git.branchCheckout repoPath base
         Git.ignoreError (Git.branchDelete repoPath testingBranch)
         Git.branchNewCheckout repoPath testingBranch origBranch
-        (Just testingBranch <$ Git.rebase repoPath base)
+        (Just testingBranch <$ Git.rebaseOnto repoPath base base)
             `Git.onFail`
             do  Git.branchCheckout repoPath origBranch
                 Git.branchDelete repoPath testingBranch
