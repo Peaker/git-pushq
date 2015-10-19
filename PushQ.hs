@@ -46,13 +46,6 @@ getTestingBranches repoPath =
                 (num, name) = fromMaybe err $ testingBranchSplitName fullName
         err = error $ "/testing/* branch format should be <num>-<name>"
 
-infixl 1 `onGitFail`
-onGitFail :: IO a -> IO a -> IO a
-act `onGitFail` handler = act `catch` \Git.GitCommandFailed {} -> handler
-
-ignoreGitError :: IO () -> IO ()
-ignoreGitError = (`onGitFail` return ())
-
 reject :: Git.RepoPath -> String -> Git.RefSpec -> String -> IO ()
 reject repoPath name refSpec msg =
     do  putStrLn $ "rejecting " ++ name ++ ":\n" ++ msg
@@ -68,10 +61,10 @@ reject repoPath name refSpec msg =
 attemptRebase :: Git.RepoPath -> (String, Git.Branch) -> String -> IO (Maybe Git.CommitID)
 attemptRebase repoPath (name, testingBranch) base =
     do  Git.branchCheckout repoPath base
-        ignoreGitError (Git.branchDelete repoPath testingBranch)
+        Git.ignoreError (Git.branchDelete repoPath testingBranch)
         Git.branchNewCheckout repoPath testingBranch origBranch
         (Just testingBranch <$ Git.rebase repoPath base)
-            `onGitFail`
+            `Git.onFail`
             do  Git.branchCheckout repoPath origBranch
                 Git.branchDelete repoPath testingBranch
                 baseCommitId <- Git.revParse repoPath base
@@ -123,7 +116,7 @@ poll repoPath =
                 Git.branchDeleteRemote repoPath remoteName ("q/" ++ name)
                 success <-
                     True <$ Git.branchNewCheckout repoPath ("orig/" ++ name) q
-                    `onGitFail`
+                    `Git.onFail`
                     False <$
                     ( reject repoPath name q $ concat
                       ["Rejected, test of ", show name, " already in progress!"]

@@ -1,6 +1,6 @@
 {-# OPTIONS -Wall #-}
 module Git
-    ( GitCommandFailed(..)
+    ( GitCommandFailed(..), onFail, ignoreError
     , fetch
     , BranchLocation(..)
     , RepoPath
@@ -20,7 +20,7 @@ module Git
     , revParse
     ) where
 
-import Control.Exception (Exception, throwIO)
+import Control.Exception (Exception, throwIO, catch)
 import Control.Monad (void)
 import Data.List (isSuffixOf)
 import Data.Typeable (Typeable)
@@ -49,6 +49,13 @@ instance Show GitCommandFailed where
         , if null err then "" else "git stderr was:\n" ++ err
         ]
 instance Exception GitCommandFailed
+
+infixl 1 `onFail`
+onFail :: IO a -> IO a -> IO a
+act `onFail` handler = act `catch` \GitCommandFailed {} -> handler
+
+ignoreError :: IO () -> IO ()
+ignoreError = (`Git.onFail` return ())
 
 git :: RepoPath -> String -> [String] -> IO String
 git repoPath cmd args =
