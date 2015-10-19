@@ -1,5 +1,5 @@
 {-# OPTIONS -Wall #-}
-module Git
+module Git.CLI
     ( GitCommandFailed(..), onFail, ignoreError
     , fetch
     , BranchLocation(..)
@@ -55,7 +55,7 @@ onFail :: IO a -> IO a -> IO a
 act `onFail` handler = act `catch` \GitCommandFailed {} -> handler
 
 ignoreError :: IO () -> IO ()
-ignoreError = (`Git.onFail` return ())
+ignoreError = (`onFail` return ())
 
 git :: RepoPath -> String -> [String] -> IO String
 git repoPath cmd args =

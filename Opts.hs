@@ -7,7 +7,7 @@ module Opts
 import           Data.List (intercalate)
 import           Data.Maybe (fromMaybe)
 import           Data.Time.Clock (NominalDiffTime)
-import qualified Git
+import qualified Git.CLI as Git
 import           Options.Applicative
 
 data Opts = Opts

@@ -8,7 +8,7 @@ import           Data.Maybe (fromMaybe, mapMaybe)
 import           Data.Monoid ((<>))
 import           Data.Time.Clock (NominalDiffTime)
 import           GHC.Stack (whoCreated)
-import qualified Git
+import qualified Git.CLI as Git
 import           Opts (parseOpts, Opts(..))
 
 -- TODO: configurable remote name
